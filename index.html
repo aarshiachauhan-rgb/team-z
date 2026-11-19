@@ -1,0 +1,1747 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>ScamVerse – Immersive 3D Financial Fraud Prevention VR World</title>
+  <meta name="description" content="Experience realistic financial fraud simulations in a fully explorable 3D VR cyber world for Meta Quest 3S & WebXR. Get Scammed in VR, Not IRL.">
+  
+  <!-- A-Frame 1.5.0 Official WebXR Library -->
+  <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+
+  <style>
+    /* ==========================================================================
+       SCAMVERSE FUTURISTIC CYBERPUNK HUD & UI STYLES
+       ========================================================================== */
+    :root {
+      --neon-cyan: #00f3ff;
+      --neon-purple: #b026ff;
+      --neon-pink: #ff007f;
+      --neon-emerald: #00ff88;
+      --neon-amber: #ffaa00;
+      --neon-crimson: #ff3344;
+      --dark-navy: #030712;
+      --panel-bg: rgba(7, 15, 36, 0.88);
+      --border-cyan: rgba(0, 243, 255, 0.4);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+      font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+    }
+
+    body, html {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: var(--dark-navy);
+      color: #e2e8f0;
+    }
+
+    /* 2D Overlay HUD (Desktop / Spectator View) */
+    #hud-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 16px;
+    }
+
+    .interactive-ui {
+      pointer-events: auto;
+    }
+
+    /* Top Bar */
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .brand-badge {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--panel-bg);
+      border: 1px solid var(--border-cyan);
+      box-shadow: 0 0 15px rgba(0, 243, 255, 0.2), inset 0 0 10px rgba(0, 243, 255, 0.1);
+      padding: 10px 18px;
+      border-radius: 8px;
+      backdrop-filter: blur(8px);
+    }
+
+    .brand-logo-icon {
+      width: 28px;
+      height: 28px;
+      background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple));
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      color: #030712;
+      font-size: 16px;
+      box-shadow: 0 0 10px var(--neon-cyan);
+    }
+
+    .brand-title {
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      background: linear-gradient(90deg, #ffffff, var(--neon-cyan));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .brand-tagline {
+      font-size: 10px;
+      color: var(--neon-purple);
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+
+    /* Stats Pill */
+    .stats-pill {
+      display: flex;
+      gap: 16px;
+      background: var(--panel-bg);
+      border: 1px solid rgba(176, 38, 255, 0.35);
+      border-radius: 8px;
+      padding: 8px 18px;
+      box-shadow: 0 0 15px rgba(176, 38, 255, 0.15);
+      backdrop-filter: blur(8px);
+    }
+
+    .stat-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .stat-label {
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #94a3b8;
+    }
+
+    .stat-val {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--neon-cyan);
+      text-shadow: 0 0 8px rgba(0, 243, 255, 0.6);
+    }
+
+    /* Quick Zone Jump Buttons */
+    .quick-nav-bar {
+      display: flex;
+      gap: 8px;
+      background: rgba(3, 7, 18, 0.75);
+      padding: 6px 10px;
+      border-radius: 30px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(6px);
+    }
+
+    .nav-btn {
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid rgba(0, 243, 255, 0.25);
+      color: #cbd5e1;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-transform: uppercase;
+    }
+
+    .nav-btn:hover {
+      background: rgba(0, 243, 255, 0.2);
+      border-color: var(--neon-cyan);
+      color: #ffffff;
+      box-shadow: 0 0 10px rgba(0, 243, 255, 0.4);
+      transform: translateY(-1px);
+    }
+
+    .nav-btn.active {
+      background: linear-gradient(135deg, rgba(0, 243, 255, 0.3), rgba(176, 38, 255, 0.3));
+      border-color: var(--neon-cyan);
+      color: var(--neon-cyan);
+      box-shadow: 0 0 12px rgba(0, 243, 255, 0.5);
+    }
+
+    /* Bottom Guide Bar */
+    .bottom-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .controls-card {
+      background: var(--panel-bg);
+      border: 1px solid var(--border-cyan);
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-size: 11px;
+      color: #94a3b8;
+      backdrop-filter: blur(8px);
+      max-width: 480px;
+      line-height: 1.5;
+    }
+
+    .controls-card span.key {
+      display: inline-block;
+      background: rgba(0, 243, 255, 0.15);
+      border: 1px solid rgba(0, 243, 255, 0.4);
+      color: var(--neon-cyan);
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-weight: 700;
+      margin: 0 2px;
+      font-size: 10px;
+    }
+
+    .action-tools {
+      display: flex;
+      gap: 10px;
+    }
+
+    .tool-btn {
+      background: var(--panel-bg);
+      border: 1px solid var(--border-cyan);
+      color: #cbd5e1;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .tool-btn:hover {
+      background: rgba(0, 243, 255, 0.25);
+      color: #ffffff;
+      box-shadow: 0 0 12px rgba(0, 243, 255, 0.4);
+    }
+
+    /* Notification Toast */
+    #notification-toast {
+      position: absolute;
+      bottom: 80px;
+      left: 50%;
+      transform: translateX(-50%) translateY(50px);
+      background: linear-gradient(135deg, rgba(7, 15, 36, 0.95), rgba(15, 23, 42, 0.95));
+      border: 1px solid var(--neon-cyan);
+      box-shadow: 0 0 25px rgba(0, 243, 255, 0.5);
+      border-radius: 8px;
+      padding: 14px 28px;
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      opacity: 0;
+      transition: all 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      pointer-events: none;
+      z-index: 1000;
+      text-align: center;
+    }
+
+    #notification-toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    /* Start / Welcome Modal */
+    #start-screen {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at center, #0a1128 0%, #030712 90%);
+      z-index: 2000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      transition: opacity 0.5s ease;
+    }
+
+    .modal-card {
+      background: rgba(10, 20, 48, 0.92);
+      border: 2px solid var(--neon-cyan);
+      box-shadow: 0 0 50px rgba(0, 243, 255, 0.3), inset 0 0 30px rgba(176, 38, 255, 0.15);
+      border-radius: 16px;
+      padding: 36px;
+      max-width: 680px;
+      width: 100%;
+      text-align: center;
+      backdrop-filter: blur(16px);
+      position: relative;
+    }
+
+    .modal-badge {
+      display: inline-block;
+      background: rgba(176, 38, 255, 0.2);
+      border: 1px solid var(--neon-purple);
+      color: var(--neon-purple);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      padding: 4px 14px;
+      border-radius: 20px;
+      margin-bottom: 16px;
+      text-transform: uppercase;
+    }
+
+    .modal-title {
+      font-size: 38px;
+      font-weight: 900;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      background: linear-gradient(135deg, #ffffff 30%, var(--neon-cyan) 70%, var(--neon-purple) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 8px;
+    }
+
+    .modal-subtitle {
+      font-size: 16px;
+      color: #94a3b8;
+      margin-bottom: 24px;
+      font-weight: 400;
+      line-height: 1.5;
+    }
+
+    .modal-subtitle strong {
+      color: var(--neon-cyan);
+    }
+
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 14px;
+      margin-bottom: 30px;
+      text-align: left;
+    }
+
+    .feature-item {
+      background: rgba(3, 7, 18, 0.6);
+      border: 1px solid rgba(0, 243, 255, 0.2);
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 12px;
+    }
+
+    .feature-title {
+      color: var(--neon-cyan);
+      font-weight: 700;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .feature-desc {
+      color: #94a3b8;
+      font-size: 11px;
+      line-height: 1.4;
+    }
+
+    .btn-enter-world {
+      background: linear-gradient(135deg, var(--neon-cyan), #0284c7);
+      border: none;
+      color: #030712;
+      font-size: 16px;
+      font-weight: 900;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 16px 42px;
+      border-radius: 30px;
+      cursor: pointer;
+      box-shadow: 0 0 25px rgba(0, 243, 255, 0.6);
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn-enter-world:hover {
+      transform: scale(1.04);
+      box-shadow: 0 0 40px rgba(0, 243, 255, 0.9);
+      background: linear-gradient(135deg, #ffffff, var(--neon-cyan));
+    }
+
+    .disclaimer-note {
+      margin-top: 18px;
+      font-size: 10px;
+      color: #64748b;
+      line-height: 1.5;
+    }
+
+    /* VR Mode Notice */
+    .vr-mode-tip {
+      margin-top: 12px;
+      font-size: 11px;
+      color: var(--neon-purple);
+      font-weight: 600;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .quick-nav-bar { display: none; }
+      .controls-card { font-size: 10px; }
+      .modal-title { font-size: 26px; }
+      .feature-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+
+  <!-- ==========================================================================
+       SCAMVERSE CORE LOGIC & A-FRAME ENGINE SCRIPTS
+       ========================================================================== -->
+  <script>
+    /* ==========================================================================
+       1. PROCEDURAL WEB AUDIO SYNTHESIZER (ZERO EXTERNAL MP3 DEPENDENCIES)
+       ========================================================================== */
+    class ScamVerseAudioEngine {
+      constructor() {
+        this.ctx = null;
+        this.muted = false;
+        this.ambientGain = null;
+        this.initialized = false;
+      }
+
+      init() {
+        if (this.initialized) return;
+        try {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          this.ctx = new AudioContext();
+          this.masterGain = this.ctx.createGain();
+          this.masterGain.gain.value = 0.35;
+          this.masterGain.connect(this.ctx.destination);
+
+          this.startAmbientCyberDrone();
+          this.initialized = true;
+        } catch (e) {
+          console.warn('Web Audio not supported or blocked:', e);
+        }
+      }
+
+      resume() {
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      }
+
+      toggleMute() {
+        this.muted = !this.muted;
+        if (this.masterGain) {
+          this.masterGain.gain.setTargetAtTime(this.muted ? 0 : 0.35, this.ctx.currentTime, 0.05);
+        }
+        return this.muted;
+      }
+
+      playHover() {
+        if (!this.ctx || this.muted) return;
+        this.resume();
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(650, this.ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(880, this.ctx.currentTime + 0.06);
+        gain.gain.setValueAtTime(0.08, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.06);
+        osc.connect(gain);
+        gain.connect(this.masterGain);
+        osc.start();
+        osc.stop(this.ctx.currentTime + 0.06);
+      }
+
+      playClick() {
+        if (!this.ctx || this.muted) return;
+        this.resume();
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(900, this.ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(1200, this.ctx.currentTime + 0.1);
+        gain.gain.setValueAtTime(0.18, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.1);
+        osc.connect(gain);
+        gain.connect(this.masterGain);
+        osc.start();
+        osc.stop(this.ctx.currentTime + 0.1);
+      }
+
+      playSuccess() {
+        if (!this.ctx || this.muted) return;
+        this.resume();
+        const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+        notes.forEach((freq, idx) => {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, this.ctx.currentTime + idx * 0.08);
+          gain.gain.setValueAtTime(0.15, this.ctx.currentTime + idx * 0.08);
+          gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + idx * 0.08 + 0.45);
+          osc.connect(gain);
+          gain.connect(this.masterGain);
+          osc.start(this.ctx.currentTime + idx * 0.08);
+          osc.stop(this.ctx.currentTime + idx * 0.08 + 0.45);
+        });
+      }
+
+      playAlert() {
+        if (!this.ctx || this.muted) return;
+        this.resume();
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(260, this.ctx.currentTime);
+        osc.frequency.setValueAtTime(195, this.ctx.currentTime + 0.15);
+        gain.gain.setValueAtTime(0.25, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.4);
+        osc.connect(gain);
+        gain.connect(this.masterGain);
+        osc.start();
+        osc.stop(this.ctx.currentTime + 0.4);
+      }
+
+      playTeleport() {
+        if (!this.ctx || this.muted) return;
+        this.resume();
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(200, this.ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(800, this.ctx.currentTime + 0.25);
+        gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.35);
+        osc.connect(gain);
+        gain.connect(this.masterGain);
+        osc.start();
+        osc.stop(this.ctx.currentTime + 0.35);
+      }
+
+      startAmbientCyberDrone() {
+        if (!this.ctx) return;
+        const osc1 = this.ctx.createOscillator();
+        const osc2 = this.ctx.createOscillator();
+        const filter = this.ctx.createBiquadFilter();
+        this.ambientGain = this.ctx.createGain();
+
+        osc1.type = 'sawtooth';
+        osc1.frequency.value = 55; // A1 low drone
+        osc2.type = 'sine';
+        osc2.frequency.value = 110; // A2 harmonic
+
+        filter.type = 'lowpass';
+        filter.frequency.value = 180;
+
+        this.ambientGain.gain.value = 0.06;
+
+        osc1.connect(filter);
+        osc2.connect(filter);
+        filter.connect(this.ambientGain);
+        this.ambientGain.connect(this.masterGain);
+
+        osc1.start();
+        osc2.start();
+      }
+    }
+
+    const soundEngine = new ScamVerseAudioEngine();
+
+    /* ==========================================================================
+       2. SCAMVERSE STATE & PERSISTENCE MANAGER
+       ========================================================================== */
+    class ScamVerseStateManager {
+      constructor() {
+        this.STORAGE_KEY = 'scamverse_user_progress_v2';
+        this.state = this.loadState();
+      }
+
+      getDefaultState() {
+        return {
+          score: 0,
+          scenariosCompleted: 0,
+          safeDecisions: 0,
+          riskyDecisions: 0,
+          cluesFound: 0,
+          scenarios: {
+            phishing: { completed: false, outcome: null, clues: [false, false, false] },
+            investment: { completed: false, outcome: null, clues: [false, false, false] },
+            upi: { completed: false, outcome: null, clues: [false, false, false] },
+            customercare: { completed: false, outcome: null, clues: [false, false, false] },
+            social: { completed: false, outcome: null, clues: [false, false, false] }
+          },
+          learningViewed: [false, false, false, false],
+          emergencyDrillDone: false,
+          badges: {
+            phishingHunter: false,
+            ponziBuster: false,
+            upiGuardian: false,
+            deviceSentinel: false,
+            socialFirewall: false
+          }
+        };
+      }
+
+      loadState() {
+        try {
+          const raw = localStorage.getItem(this.STORAGE_KEY);
+          if (raw) return JSON.parse(raw);
+        } catch (e) {
+          console.warn('Storage unavailable:', e);
+        }
+        return this.getDefaultState();
+      }
+
+      saveState() {
+        try {
+          localStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.state));
+        } catch (e) {
+          console.warn('Could not save state:', e);
+        }
+        this.updateHUD();
+        this.update3DDashboard();
+      }
+
+      resetProgress() {
+        this.state = this.getDefaultState();
+        this.saveState();
+      }
+
+      inspectClue(scenarioId, clueIndex) {
+        if (!this.state.scenarios[scenarioId]) return;
+        if (!this.state.scenarios[scenarioId].clues[clueIndex]) {
+          this.state.scenarios[scenarioId].clues[clueIndex] = true;
+          this.state.cluesFound++;
+          this.state.score = Math.min(100, this.state.score + 5);
+          this.saveState();
+        }
+      }
+
+      completeScenario(scenarioId, isSafe) {
+        const sc = this.state.scenarios[scenarioId];
+        if (!sc) return;
+
+        const isFirstTime = !sc.completed;
+        sc.completed = true;
+        sc.outcome = isSafe ? 'SAFE' : 'RISKY';
+
+        if (isFirstTime) {
+          this.state.scenariosCompleted++;
+          if (isSafe) {
+            this.state.safeDecisions++;
+            this.state.score = Math.min(100, this.state.score + 15);
+            // Award badge
+            if (scenarioId === 'phishing') this.state.badges.phishingHunter = true;
+            if (scenarioId === 'investment') this.state.badges.ponziBuster = true;
+            if (scenarioId === 'upi') this.state.badges.upiGuardian = true;
+            if (scenarioId === 'customercare') this.state.badges.deviceSentinel = true;
+            if (scenarioId === 'social') this.state.badges.socialFirewall = true;
+          } else {
+            this.state.riskyDecisions++;
+            this.state.score = Math.max(0, this.state.score - 5);
+          }
+          this.saveState();
+        }
+      }
+
+      updateHUD() {
+        const scoreEl = document.getElementById('hud-score-val');
+        const doneEl = document.getElementById('hud-done-val');
+        const safeEl = document.getElementById('hud-safe-val');
+        if (scoreEl) scoreEl.textContent = this.state.score + '%';
+        if (doneEl) doneEl.textContent = this.state.scenariosCompleted + '/5';
+        if (safeEl) safeEl.textContent = this.state.safeDecisions;
+      }
+
+      update3DDashboard() {
+        // Update 3D Dashboard texts in the scene
+        const scoreText = document.querySelector('#dash-score-text');
+        const scenariosText = document.querySelector('#dash-scenarios-text');
+        const safeText = document.querySelector('#dash-safe-text');
+        const riskyText = document.querySelector('#dash-risky-text');
+        const ratingText = document.querySelector('#dash-rating-text');
+
+        if (scoreText) scoreText.setAttribute('value', `${this.state.score}%`);
+        if (scenariosText) scenariosText.setAttribute('value', `${this.state.scenariosCompleted} / 5 Completed`);
+        if (safeText) safeText.setAttribute('value', `Safe Decisions: ${this.state.safeDecisions}`);
+        if (riskyText) riskyText.setAttribute('value', `Risky Traps Tripped: ${this.state.riskyDecisions}`);
+
+        let rating = "ROOKIE TARGET";
+        let ratingColor = "#ff3344";
+        if (this.state.score >= 80) {
+          rating = "CYBER SENTINEL (FORTIFIED)";
+          ratingColor = "#00ff88";
+        } else if (this.state.score >= 50) {
+          rating = "ALERT EXPLORER (VIGILANT)";
+          ratingColor = "#ffaa00";
+        }
+        if (ratingText) {
+          ratingText.setAttribute('value', `RATING: ${rating}`);
+          ratingText.setAttribute('color', ratingColor);
+        }
+
+        // Update badge pedestals
+        const b1 = document.querySelector('#badge-phishing');
+        const b2 = document.querySelector('#badge-investment');
+        const b3 = document.querySelector('#badge-upi');
+        const b4 = document.querySelector('#badge-customercare');
+        const b5 = document.querySelector('#badge-social');
+
+        if (b1) b1.setAttribute('color', this.state.badges.phishingHunter ? '#00f3ff' : '#334155');
+        if (b2) b2.setAttribute('color', this.state.badges.ponziBuster ? '#b026ff' : '#334155');
+        if (b3) b3.setAttribute('color', this.state.badges.upiGuardian ? '#00ff88' : '#334155');
+        if (b4) b4.setAttribute('color', this.state.badges.deviceSentinel ? '#ffaa00' : '#334155');
+        if (b5) b5.setAttribute('color', this.state.badges.socialFirewall ? '#ff007f' : '#334155');
+      }
+    }
+
+    const gameState = new ScamVerseStateManager();
+
+    /* ==========================================================================
+       3. CUSTOM A-FRAME COMPONENTS: META QUEST 3S LOCOMOTION & INTERACTIONS
+       ========================================================================== */
+
+    // Component for Meta Quest 3S thumbstick movement and snap turn
+    AFRAME.registerComponent('quest-controller-locomotion', {
+      schema: {
+        hand: { type: 'string', default: 'left' },
+        speed: { type: 'number', default: 0.12 }
+      },
+      init: function () {
+        this.rig = document.querySelector('#camera-rig');
+        this.head = document.querySelector('#head-camera');
+        this.turnCooldown = false;
+
+        this.el.addEventListener('axismove', (e) => {
+          const axes = e.detail.axis;
+          if (!axes || axes.length < 2) return;
+
+          // Standard mapping: Left stick (X, Y) for translation, Right stick (X) for snap turn
+          let stickX = axes[2] !== undefined ? axes[2] : axes[0];
+          let stickY = axes[3] !== undefined ? axes[3] : axes[1];
+
+          // Apply deadzone
+          if (Math.abs(stickX) < 0.15) stickX = 0;
+          if (Math.abs(stickY) < 0.15) stickY = 0;
+
+          if (this.data.hand === 'left') {
+            // Locomotion (move forward/back, strafe left/right based on head gaze direction)
+            if (stickX !== 0 || stickY !== 0) {
+              const rot = this.head.getAttribute('rotation');
+              const rad = (rot.y * Math.PI) / 180;
+
+              const dx = (stickX * Math.cos(rad) + stickY * Math.sin(rad)) * this.data.speed;
+              const dz = (stickY * Math.cos(rad) - stickX * Math.sin(rad)) * this.data.speed;
+
+              const curPos = this.rig.getAttribute('position');
+              this.rig.setAttribute('position', {
+                x: curPos.x + dx,
+                y: curPos.y,
+                z: curPos.z + dz
+              });
+            }
+          } else if (this.data.hand === 'right') {
+            // Snap Turn (Comfortable rotation on Right Thumbstick)
+            if (Math.abs(stickX) > 0.65 && !this.turnCooldown) {
+              this.turnCooldown = true;
+              const rigRot = this.rig.getAttribute('rotation') || { x: 0, y: 0, z: 0 };
+              const snapAngle = stickX > 0 ? -45 : 45;
+              this.rig.setAttribute('rotation', {
+                x: rigRot.x,
+                y: rigRot.y + snapAngle,
+                z: rigRot.z
+              });
+              soundEngine.playHover();
+              setTimeout(() => { this.turnCooldown = false; }, 320);
+            }
+          }
+        });
+      }
+    });
+
+    // Component for Interactive VR Button Hover & Feedback
+    AFRAME.registerComponent('vr-button', {
+      schema: {
+        hoverColor: { type: 'color', default: '#00f3ff' },
+        defaultColor: { type: 'color', default: '#0f172a' }
+      },
+      init: function () {
+        const el = this.el;
+        el.addEventListener('mouseenter', () => {
+          el.setAttribute('material', 'color', this.data.hoverColor);
+          soundEngine.playHover();
+        });
+        el.addEventListener('mouseleave', () => {
+          el.setAttribute('material', 'color', this.data.defaultColor);
+        });
+        el.addEventListener('click', () => {
+          soundEngine.playClick();
+          // Scale feedback punch
+          el.setAttribute('animation__punch', {
+            property: 'scale',
+            to: '1.1 1.1 1.1',
+            dur: 80,
+            dir: 'alternate',
+            loop: 2
+          });
+        });
+      }
+    });
+
+    // Floating Hologram Oscillation
+    AFRAME.registerComponent('hologram-float', {
+      schema: {
+        speed: { type: 'number', default: 1.5 },
+        height: { type: 'number', default: 0.08 }
+      },
+      init: function () {
+        this.initialY = this.el.getAttribute('position').y;
+        this.time = Math.random() * 100;
+      },
+      tick: function (time, timeDelta) {
+        this.time += (timeDelta || 16) * 0.001 * this.data.speed;
+        const currentPos = this.el.getAttribute('position');
+        this.el.setAttribute('position', {
+          x: currentPos.x,
+          y: this.initialY + Math.sin(this.time) * this.data.height,
+          z: currentPos.z
+        });
+      }
+    });
+
+    // Portal Zone Fast Travel
+    AFRAME.registerComponent('zone-teleport-target', {
+      schema: {
+        targetX: { type: 'number', default: 0 },
+        targetY: { type: 'number', default: 0 },
+        targetZ: { type: 'number', default: 0 },
+        zoneName: { type: 'string', default: 'Central Hub' }
+      },
+      init: function () {
+        this.el.addEventListener('click', () => {
+          teleportPlayer(this.data.targetX, this.data.targetY, this.data.targetZ, this.data.zoneName);
+        });
+      }
+    });
+
+    /* ==========================================================================
+       4. GLOBAL HELPER FUNCTIONS
+       ========================================================================== */
+    function teleportPlayer(x, y, z, zoneName) {
+      const rig = document.querySelector('#camera-rig');
+      if (rig) {
+        soundEngine.playTeleport();
+        rig.setAttribute('position', { x, y, z });
+        showNotification(`TRANSIT: Arrived at ${zoneName}`);
+        
+        // Update 2D nav active states
+        document.querySelectorAll('.nav-btn').forEach(btn => {
+          btn.classList.toggle('active', btn.getAttribute('data-zone') === zoneName);
+        });
+      }
+    }
+
+    function showNotification(text) {
+      const toast = document.getElementById('notification-toast');
+      if (toast) {
+        toast.textContent = text;
+        toast.classList.add('show');
+        setTimeout(() => {
+          toast.classList.remove('show');
+        }, 3200);
+      }
+    }
+
+    function enterExperience() {
+      soundEngine.init();
+      soundEngine.playSuccess();
+      const startScreen = document.getElementById('start-screen');
+      if (startScreen) {
+        startScreen.style.opacity = '0';
+        setTimeout(() => {
+          startScreen.style.display = 'none';
+        }, 500);
+      }
+      showNotification('SCAMVERSE ACTIVATED: Welcome to Cyber Training Ground');
+      gameState.updateHUD();
+      gameState.update3DDashboard();
+    }
+
+    /* Scenario Interactions */
+    function inspectScenarioClue(scenarioId, clueIdx, clueTitle, clueDetail) {
+      soundEngine.playClick();
+      gameState.inspectClue(scenarioId, clueIdx);
+
+      // Update 3D Clue Display
+      const clueBox = document.querySelector(`#${scenarioId}-clue-display`);
+      const clueDetailText = document.querySelector(`#${scenarioId}-clue-text`);
+      if (clueBox && clueDetailText) {
+        clueBox.setAttribute('visible', 'true');
+        clueDetailText.setAttribute('value', `${clueTitle.toUpperCase()}\n${clueDetail}`);
+      }
+      showNotification(`🔍 CLUE DISCOVERED: ${clueTitle}`);
+    }
+
+    function evaluateScenarioChoice(scenarioId, isSafe, title, explanation) {
+      if (isSafe) {
+        soundEngine.playSuccess();
+      } else {
+        soundEngine.playAlert();
+      }
+
+      gameState.completeScenario(scenarioId, isSafe);
+
+      // Update 3D Outcome Board
+      const outcomeBoard = document.querySelector(`#${scenarioId}-outcome-board`);
+      const outcomeTitle = document.querySelector(`#${scenarioId}-outcome-title`);
+      const outcomeDesc = document.querySelector(`#${scenarioId}-outcome-desc`);
+
+      if (outcomeBoard && outcomeTitle && outcomeDesc) {
+        outcomeBoard.setAttribute('visible', 'true');
+        outcomeBoard.setAttribute('material', 'color', isSafe ? '#064e3b' : '#7f1d1d');
+        outcomeTitle.setAttribute('value', isSafe ? `✅ ${title}` : `⚠️ ${title}`);
+        outcomeTitle.setAttribute('color', isSafe ? '#00ff88' : '#ff3344');
+        outcomeDesc.setAttribute('value', explanation);
+      }
+
+      showNotification(isSafe ? `✅ DEFENSE SUCCESS: ${title}` : `⚠️ SCAM TRIGGERED: ${title}`);
+    }
+
+    // Emergency Drill Simulator
+    let drillStep = 0;
+    function advanceEmergencyDrill() {
+      soundEngine.playClick();
+      drillStep++;
+      const drillText = document.querySelector('#drill-status-text');
+      const drillBtn = document.querySelector('#drill-step-btn');
+      const drillBtnText = document.querySelector('#drill-btn-text');
+
+      if (drillStep === 1) {
+        drillText.setAttribute('value', 'STEP 1: DIAL 1930 / OPEN HELPLINE\nImmediate bank notification stops fund transfer out of mule accounts within the "Golden Hour".');
+        drillBtnText.setAttribute('value', '[2] FREEZE NETBANKING & UPI');
+        soundEngine.playHover();
+      } else if (drillStep === 2) {
+        drillText.setAttribute('value', 'STEP 2: FREEZE CREDENTIALS & SESSIONS\nLock UPI ID & Internet Banking via bank SMS/USSD emergency code. Block stolen SIM.');
+        drillBtnText.setAttribute('value', '[3] FILE REPORT ON CYBERCRIME.GOV.IN');
+        soundEngine.playHover();
+      } else if (drillStep === 3) {
+        drillText.setAttribute('value', 'STEP 3: LODGE FORMAL COMPLAINT\nUpload UTR numbers, chat screenshots & transaction slips to National Cyber Crime Portal.');
+        drillBtnText.setAttribute('value', 'DRILL COMPLETED (RESET)');
+        soundEngine.playSuccess();
+        gameState.state.emergencyDrillDone = true;
+        gameState.state.score = Math.min(100, gameState.state.score + 10);
+        gameState.saveState();
+        showNotification('🏆 EMERGENCY PROTOCOL MASTERED (+10 Score)');
+      } else {
+        drillStep = 0;
+        drillText.setAttribute('value', 'PRACTICE 60-SEC EMERGENCY PROTOCOL\nClick button below to start the rapid incident response drill.');
+        drillBtnText.setAttribute('value', 'START PROTOCOL DRILL');
+        soundEngine.playHover();
+      }
+    }
+  </script>
+</head>
+
+<body>
+  <!-- ==========================================================================
+       2D SPECTATOR / DESKTOP HUD OVERLAY
+       ========================================================================== -->
+  <div id="hud-overlay">
+    <!-- Top HUD Bar -->
+    <div class="top-bar">
+      <div class="brand-badge interactive-ui">
+        <div class="brand-logo-icon">⚡</div>
+        <div>
+          <div class="brand-title">SCAMVERSE</div>
+          <div class="brand-tagline">3D Fraud Prevention Matrix</div>
+        </div>
+      </div>
+
+      <!-- Quick Fast-Travel Bar -->
+      <div class="quick-nav-bar interactive-ui">
+        <button class="nav-btn active" data-zone="Central Hub" onclick="teleportPlayer(0, 0, 6, 'Central Hub')">Central Hub</button>
+        <button class="nav-btn" data-zone="Simulation Zone" onclick="teleportPlayer(0, 0, -22, 'Simulation Zone')">Scam Pods</button>
+        <button class="nav-btn" data-zone="Analysis Zone" onclick="teleportPlayer(26, 0, 0, 'Analysis Zone')">Analysis</button>
+        <button class="nav-btn" data-zone="Learning Centre" onclick="teleportPlayer(-26, 0, 0, 'Learning Centre')">Learning</button>
+        <button class="nav-btn" data-zone="Recovery Centre" onclick="teleportPlayer(-18, 0, -18, 'Recovery Centre')">Recovery 1930</button>
+        <button class="nav-btn" data-zone="Orientation Hall" onclick="teleportPlayer(0, 0, 20, 'Orientation Hall')">Orientation</button>
+      </div>
+
+      <!-- Live Score & Progress Pill -->
+      <div class="stats-pill interactive-ui">
+        <div class="stat-item">
+          <span class="stat-label">Cyber Armor</span>
+          <span class="stat-val" id="hud-score-val">0%</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Scenarios</span>
+          <span class="stat-val" id="hud-done-val">0/5</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Safe Choices</span>
+          <span class="stat-val" id="hud-safe-val">0</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="notification-toast">Welcome to ScamVerse</div>
+
+    <!-- Bottom HUD Bar -->
+    <div class="bottom-bar">
+      <div class="controls-card interactive-ui">
+        <strong>Controls:</strong>
+        <span class="key">W</span><span class="key">A</span><span class="key">S</span><span class="key">D</span> Walk |
+        <span class="key">Mouse / Laser</span> Look & Point |
+        <span class="key">Left Click / Trigger</span> Interact |
+        <strong>Meta Quest 3S:</strong> Left Stick = Move, Right Stick = Snap Turn.
+      </div>
+
+      <div class="action-tools interactive-ui">
+        <button class="tool-btn" onclick="soundEngine.toggleMute()">
+          🔊 Audio Toggle
+        </button>
+        <button class="tool-btn" onclick="gameState.resetProgress(); showNotification('Progress Data Reset');">
+          🔄 Reset Stats
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+       STARTUP & BRIEFING MODAL
+       ========================================================================== -->
+  <div id="start-screen">
+    <div class="modal-card">
+      <div class="modal-badge">WebXR • Meta Quest 3S Optimized • Interactive 3D</div>
+      <h1 class="modal-title">SCAMVERSE</h1>
+      <p class="modal-subtitle">
+        <strong>"Get Scammed in VR, Not IRL."</strong><br>
+        Enter an explorable 3D cybersecurity universe. Physically investigate realistic financial fraud attacks, inspect forensic clues, make critical decisions, and build a fraud-resistant mind.
+      </p>
+
+      <div class="feature-grid">
+        <div class="feature-item">
+          <div class="feature-title">🌐 360° Living 3D World</div>
+          <div class="feature-desc">Physical locomotion, corridors, 5 explorable chambers, futuristic architecture.</div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-title">🎮 5 Realistic Scam Scenarios</div>
+          <div class="feature-desc">Phishing, Fake Investment, UPI QR Trap, Fake Customer Care, Social Engineering.</div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-title">📊 3D Holographic Dashboard</div>
+          <div class="feature-desc">Live performance tracking, radar analysis, unlockable trophy badges.</div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-title">🚨 Crisis Recovery 1930</div>
+          <div class="feature-desc">Real Indian fraud response playbook, Golden Hour freeze, Cybercrime reporting.</div>
+        </div>
+      </div>
+
+      <button class="btn-enter-world" onclick="enterExperience()">
+        ENTER SCAMVERSE VR
+      </button>
+
+      <div class="vr-mode-tip">
+        🥽 Meta Quest 3S: Click the "VR" button in the bottom right corner of your headset to enter full immersive mode.
+      </div>
+
+      <div class="disclaimer-note">
+        Educational Simulation: Uses dummy credentials and fictional scenarios. Never shares real data. Compliant with Indian cybersecurity guidelines (1930 helpline & cybercrime.gov.in).
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+       A-FRAME 3D SCENE CONFIGURATION
+       ========================================================================== -->
+  <a-scene
+    renderer="antialias: true; colorManagement: true; physicallyCorrectLights: false;"
+    fog="type: exponential; color: #030712; density: 0.016"
+    background="color: #030712">
+
+    <!-- ASSET DEFINITIONS -->
+    <a-assets>
+      <!-- Reusable mixins for futuristic styling -->
+      <a-mixin id="neon-cyan-glow" material="color: #00f3ff; emissive: #00f3ff; emissiveIntensity: 0.6; roughness: 0.2; metalness: 0.8"></a-mixin>
+      <a-mixin id="neon-purple-glow" material="color: #b026ff; emissive: #b026ff; emissiveIntensity: 0.6; roughness: 0.2; metalness: 0.8"></a-mixin>
+      <a-mixin id="glass-holo" material="color: #0a1b3a; opacity: 0.78; transparent: true; roughness: 0.1; metalness: 0.9; side: double"></a-mixin>
+      <a-mixin id="wall-panel" material="color: #0b1329; roughness: 0.8; metalness: 0.4"></a-mixin>
+      <a-mixin id="floor-tile" material="color: #060b18; roughness: 0.5; metalness: 0.6"></a-mixin>
+    </a-assets>
+
+    <!-- LIGHTING SETUP -->
+    <a-entity light="type: ambient; color: #1e293b; intensity: 0.8"></a-entity>
+    
+    <!-- Central Hub Accent Lights -->
+    <a-entity id="hub-light-cyan" light="type: point; color: #00f3ff; intensity: 1.8; distance: 28" position="0 5 0"></a-entity>
+    <a-entity id="hub-light-purple" light="type: point; color: #b026ff; intensity: 1.5; distance: 28" position="0 5 -12"></a-entity>
+
+    <!-- ========================================================================
+         PLAYER RIG (WEBXR META QUEST 3S & DESKTOP CONTROLS)
+         ======================================================================== -->
+    <a-entity id="camera-rig" position="0 0 6" rotation="0 0 0">
+      <!-- Head Camera -->
+      <a-camera id="head-camera" position="0 1.6 0" look-controls="pointerLockEnabled: false" wasd-controls="acceleration: 24">
+        <!-- Desktop Cursor Reticle -->
+        <a-cursor
+          id="desktop-cursor"
+          position="0 0 -1"
+          geometry="primitive: ring; radiusInner: 0.008; radiusOuter: 0.014"
+          material="color: #00f3ff; shader: flat"
+          raycaster="objects: .clickable; far: 20"
+          cursor="fuse: false;">
+        </a-cursor>
+
+        <!-- Subtle VR Heads-Up Status Panel -->
+        <a-entity position="0 -0.55 -1.2" rotation="-15 0 0" scale="0.8 0.8 0.8">
+          <a-plane width="0.75" height="0.12" material="color: #030712; opacity: 0.7; transparent: true"></a-plane>
+          <a-text value="SCAMVERSE • QUEST 3S" position="0 0.02 0.01" align="center" width="1.2" color="#00f3ff"></a-text>
+          <a-text value="L-Stick: Walk | R-Stick: Turn | Trigger: Select" position="0 -0.025 0.01" align="center" width="0.9" color="#94a3b8"></a-text>
+        </a-entity>
+      </a-camera>
+
+      <!-- Left Meta Quest Controller (Movement Thumbstick + Laser) -->
+      <a-entity
+        id="left-hand"
+        oculus-touch-controls="hand: left; model: true;"
+        laser-controls="hand: left"
+        raycaster="objects: .clickable; far: 18; showLine: true; lineColor: #b026ff"
+        quest-controller-locomotion="hand: left; speed: 0.12">
+        <!-- Wristpad Return-to-Hub Button -->
+        <a-entity position="0 0.03 0.08" rotation="-30 0 0">
+          <a-box class="clickable" vr-button="hoverColor: #ff007f; defaultColor: #1e1b4b" position="0 0 0" scale="0.08 0.02 0.04" material="color: #1e1b4b" zone-teleport-target="targetX: 0; targetY: 0; targetZ: 6; zoneName: Central Hub"></a-box>
+          <a-text value="HUB" position="0 0.015 0" align="center" width="0.4" color="#00f3ff" rotation="-90 0 0"></a-text>
+        </a-entity>
+      </a-entity>
+
+      <!-- Right Meta Quest Controller (Snap Turn Thumbstick + Primary Laser) -->
+      <a-entity
+        id="right-hand"
+        oculus-touch-controls="hand: right; model: true;"
+        laser-controls="hand: right"
+        raycaster="objects: .clickable; far: 18; showLine: true; lineColor: #00f3ff"
+        quest-controller-locomotion="hand: right; speed: 0.12">
+      </a-entity>
+    </a-entity>
+
+    <!-- ========================================================================
+         ZONE 0: THE CENTRAL CYBER HUB ATRIUM (ORIGIN 0, 0, 0)
+         ======================================================================== -->
+    <a-entity id="zone-central-hub">
+      <!-- Hub Floor -->
+      <a-cylinder position="0 0 0" radius="16" height="0.2" segments-radial="32" mixin="floor-tile"></a-cylinder>
+      
+      <!-- Glowing Concentric Floor Rings -->
+      <a-ring position="0 0.11 0" rotation="-90 0 0" radius-inner="3.8" radius-outer="4.1" mixin="neon-cyan-glow"></a-ring>
+      <a-ring position="0 0.11 0" rotation="-90 0 0" radius-inner="8.8" radius-outer="9.1" mixin="neon-purple-glow"></a-ring>
+      <a-ring position="0 0.11 0" rotation="-90 0 0" radius-inner="14.8" radius-outer="15.1" mixin="neon-cyan-glow"></a-ring>
+
+      <!-- Center Hologram Pedestal -->
+      <a-cylinder position="0 0.4 0" radius="1.6" height="0.8" material="color: #0b1329; metalness: 0.8; roughness: 0.2"></a-cylinder>
+      <a-ring position="0 0.81 0" rotation="-90 0 0" radius-inner="1.3" radius-outer="1.5" mixin="neon-cyan-glow"></a-ring>
+
+      <!-- Floating 3D Holographic ScamVerse Core (Center Art) -->
+      <a-entity position="0 2.2 0" hologram-float="speed: 1.8; height: 0.12">
+        <a-octahedron radius="0.8" mixin="neon-cyan-glow" animation="property: rotation; to: 0 360 360; loop: true; dur: 12000; easing: linear"></a-octahedron>
+        <a-torus radius="1.3" radius-tubular="0.02" mixin="neon-purple-glow" animation="property: rotation; to: 360 0 360; loop: true; dur: 8000; easing: linear"></a-torus>
+        <a-torus radius="1.6" radius-tubular="0.02" mixin="neon-cyan-glow" animation="property: rotation; to: 360 360 0; loop: true; dur: 10000; easing: linear"></a-torus>
+        <a-text value="SCAMVERSE\nCENTRAL CORE" position="0 -1.2 0" align="center" width="3" color="#00f3ff"></a-text>
+      </a-entity>
+
+      <!-- Surrounding Architectural Energy Columns -->
+      <!-- Pillar 1 -->
+      <a-cylinder position="10 4 10" radius="0.6" height="8" mixin="wall-panel"></a-cylinder>
+      <a-box position="10 4 10" scale="0.1 7.8 1.3" mixin="neon-cyan-glow"></a-box>
+      <!-- Pillar 2 -->
+      <a-cylinder position="-10 4 10" radius="0.6" height="8" mixin="wall-panel"></a-cylinder>
+      <a-box position="-10 4 10" scale="0.1 7.8 1.3" mixin="neon-purple-glow"></a-box>
+      <!-- Pillar 3 -->
+      <a-cylinder position="10 4 -10" radius="0.6" height="8" mixin="wall-panel"></a-cylinder>
+      <a-box position="10 4 -10" scale="0.1 7.8 1.3" mixin="neon-purple-glow"></a-box>
+      <!-- Pillar 4 -->
+      <a-cylinder position="-10 4 -10" radius="0.6" height="8" mixin="wall-panel"></a-cylinder>
+      <a-box position="-10 4 -10" scale="0.1 7.8 1.3" mixin="neon-cyan-glow"></a-box>
+
+      <!-- Hub Signposts & Gateways -->
+      <!-- North Gateway: Scam Simulation Zone -->
+      <a-entity position="0 0 -14">
+        <a-box position="0 3 0" scale="6 0.4 0.3" mixin="neon-cyan-glow"></a-box>
+        <a-box position="-3 1.5 0" scale="0.3 3 0.3" mixin="wall-panel"></a-box>
+        <a-box position="3 1.5 0" scale="0.3 3 0.3" mixin="wall-panel"></a-box>
+        <a-text value="▲ SCAM SIMULATION ZONE ▲\n5 Interactive Attack Pods" position="0 3.5 0" align="center" width="4.5" color="#00f3ff"></a-text>
+        <!-- Interactive Fast Travel Beacon -->
+        <a-cylinder class="clickable" vr-button="hoverColor: #00f3ff; defaultColor: #0b1329" position="0 0.1 0" radius="1.2" height="0.2" material="color: #0b1329" zone-teleport-target="targetX: 0; targetY: 0; targetZ: -22; zoneName: Scam Simulation Zone"></a-cylinder>
+        <a-text value="ENTER ZONE [CLICK]" position="0 0.8 0" align="center" width="2.4" color="#ffffff"></a-text>
+      </a-entity>
+
+      <!-- East Gateway: Personal Analysis Zone -->
+      <a-entity position="14 0 0" rotation="0 -90 0">
+        <a-box position="0 3 0" scale="6 0.4 0.3" mixin="neon-purple-glow"></a-box>
+        <a-text value="► PERSONAL ANALYSIS ZONE ►\n3D Threat Intelligence & Stats" position="0 3.5 0" align="center" width="4.5" color="#b026ff"></a-text>
+        <a-cylinder class="clickable" vr-button="hoverColor: #b026ff; defaultColor: #0b1329" position="0 0.1 0" radius="1.2" height="0.2" material="color: #0b1329" zone-teleport-target="targetX: 26; targetY: 0; targetZ: 0; zoneName: Personal Analysis Zone"></a-cylinder>
+        <a-text value="ENTER ZONE [CLICK]" position="0 0.8 0" align="center" width="2.4" color="#ffffff"></a-text>
+      </a-entity>
+
+      <!-- West Gateway: Learning & Prevention Centre -->
+      <a-entity position="-14 0 0" rotation="0 90 0">
+        <a-box position="0 3 0" scale="6 0.4 0.3" mixin="neon-cyan-glow"></a-box>
+        <a-text value="◄ LEARNING & PREVENTION ◄\nGolden Rules & Defense Modules" position="0 3.5 0" align="center" width="4.5" color="#00f3ff"></a-text>
+        <a-cylinder class="clickable" vr-button="hoverColor: #00f3ff; defaultColor: #0b1329" position="0 0.1 0" radius="1.2" height="0.2" material="color: #0b1329" zone-teleport-target="targetX: -26; targetY: 0; targetZ: 0; zoneName: Learning & Prevention Centre"></a-cylinder>
+        <a-text value="ENTER ZONE [CLICK]" position="0 0.8 0" align="center" width="2.4" color="#ffffff"></a-text>
+      </a-entity>
+
+      <!-- South Gateway: Welcome & Orientation Hall -->
+      <a-entity position="0 0 14" rotation="0 180 0">
+        <a-box position="0 3 0" scale="6 0.4 0.3" mixin="neon-purple-glow"></a-box>
+        <a-text value="▼ ORIENTATION & CONTROLS ▼\nSystem Manual & Philosophy" position="0 3.5 0" align="center" width="4.5" color="#b026ff"></a-text>
+        <a-cylinder class="clickable" vr-button="hoverColor: #b026ff; defaultColor: #0b1329" position="0 0.1 0" radius="1.2" height="0.2" material="color: #0b1329" zone-teleport-target="targetX: 0; targetY: 0; targetZ: 20; zoneName: Welcome & Orientation Hall"></a-cylinder>
+        <a-text value="ENTER ZONE [CLICK]" position="0 0.8 0" align="center" width="2.4" color="#ffffff"></a-text>
+      </a-entity>
+    </a-entity>
+
+    <!-- ========================================================================
+         ZONE 1: WELCOME & ORIENTATION HALL (SOUTH WING: 0, 0, 24)
+         ======================================================================== -->
+    <a-entity id="zone-orientation" position="0 0 24">
+      <!-- Floor & Walls -->
+      <a-box position="0 -0.05 0" scale="16 0.1 14" mixin="floor-tile"></a-box>
+      <a-box position="0 3 7" scale="16 6 0.4" mixin="wall-panel"></a-box>
+      <a-box position="-8 3 0" scale="0.4 6 14" mixin="wall-panel"></a-box>
+      <a-box position="8 3 0" scale="0.4 6 14" mixin="wall-panel"></a-box>
+
+      <!-- Mission Statement Header -->
+      <a-text value="WELCOME TO SCAMVERSE" position="0 4.8 6.6" rotation="0 180 0" align="center" width="8" color="#00f3ff"></a-text>
+      <a-text value='"Get Scammed in VR, Not IRL."' position="0 4.2 6.6" rotation="0 180 0" align="center" width="5.5" color="#b026ff"></a-text>
+
+      <!-- Three Educational Exhibition Terminals -->
+      <!-- Terminal A: Mission & Philosophy -->
+      <a-entity position="-4.5 0 2" rotation="0 140 0">
+        <a-box position="0 1 0" scale="2.2 2 0.3" mixin="glass-holo"></a-box>
+        <a-box position="0 2.1 0" scale="2.2 0.2 0.3" mixin="neon-cyan-glow"></a-box>
+        <a-text value="OUR MISSION\n\nFinancial fraud does not happen\nbecause people are foolish.\nIt happens because fraudsters\nmanipulate psychological urgency,\ncounterfeit brand trust, and\nweaponize confusion.\n\nWe build fraud-resistant minds\nthrough direct VR inoculation." position="0 1 0.16" align="center" width="1.9" color="#e2e8f0"></a-text>
+      </a-entity>
+
+      <!-- Terminal B: 5-Stage Learning System -->
+      <a-entity position="0 0 4" rotation="0 180 0">
+        <a-box position="0 1.2 0" scale="3.2 2.2 0.3" mixin="glass-holo"></a-box>
+        <a-box position="0 2.4 0" scale="3.2 0.2 0.3" mixin="neon-purple-glow"></a-box>
+        <a-text value="THE 5-STAGE DEFENSE PIPELINE\n\n1. EXPERIENCE: Live realistic 3D fraud attacks.\n2. REACT: Inspect clues & choose actions.\n3. ANALYSE: Understand the scam mechanics.\n4. LEARN: Cement golden safety rules.\n5. RECOVER: Execute rapid 1930 incident response." position="0 1.2 0.16" align="center" width="2.9" color="#e2e8f0"></a-text>
+      </a-entity>
+
+      <!-- Terminal C: Meta Quest 3S & VR Controls Guide -->
+      <a-entity position="4.5 0 2" rotation="0 -140 0">
+        <a-box position="0 1 0" scale="2.2 2 0.3" mixin="glass-holo"></a-box>
+        <a-box position="0 2.1 0" scale="2.2 0.2 0.3" mixin="neon-cyan-glow"></a-box>
+        <a-text value="VR HARDWARE CONTROLS\n\n• LEFT THUMBSTICK: Locomotion (Walk)\n• RIGHT THUMBSTICK: Snap Turn\n• CONTROLLER LASERS: Point & Hover\n• INDEX TRIGGERS: Select & Trigger\n• WRISTPAD: Instant Return to Hub\n\nDesktop: WASD to walk, Mouse to look." position="0 1 0.16" align="center" width="1.9" color="#e2e8f0"></a-text>
+      </a-entity>
+
+      <!-- Fast Travel Back to Hub -->
+      <a-cylinder class="clickable" vr-button="hoverColor: #00f3ff; defaultColor: #1e1b4b" position="0 0.1 -4" radius="1" height="0.15" material="color: #1e1b4b" zone-teleport-target="targetX: 0; targetY: 0; targetZ: 6; zoneName: Central Hub"></a-cylinder>
+      <a-text value="▲ RETURN TO HUB ▲" position="0 0.8 -4" align="center" width="2.4" color="#00f3ff"></a-text>
+    </a-entity>
+
+    <!-- ========================================================================
+         ZONE 2: SCAM SIMULATION MATRIX (NORTH WING: 0, 0, -32)
+         5 FULLY INTERACTIVE EXPLORABLE SCAM CHAMBERS
+         ======================================================================== -->
+    <a-entity id="zone-scam-matrix" position="0 0 -32">
+      <!-- Grand Simulation Corridor Floor & Ceiling -->
+      <a-box position="0 -0.05 0" scale="32 0.1 24" mixin="floor-tile"></a-box>
+      <a-box position="0 7 0" scale="32 0.2 24" material="color: #030712; metalness: 0.8; roughness: 0.3"></a-box>
+
+      <!-- Zone Title Header -->
+      <a-text value="SCAM SIMULATION MATRIX" position="0 5.5 8" align="center" width="9" color="#00f3ff"></a-text>
+      <a-text value="Approach any pod to inspect evidence and test your threat recognition." position="0 4.8 8" align="center" width="5.5" color="#94a3b8"></a-text>
+
+      <!-- Return to Hub Portal at Entrance -->
+      <a-cylinder class="clickable" vr-button="hoverColor: #b026ff; defaultColor: #1e1b4b" position="0 0.1 9" radius="1.2" height="0.15" material="color: #1e1b4b" zone-teleport-target="targetX: 0; targetY: 0; targetZ: -10; zoneName: Central Hub"></a-cylinder>
+      <a-text value="▼ RETURN TO HUB ▼" position="0 0.8 9" align="center" width="2.4" color="#b026ff"></a-text>
+
+      <!-- ====================================================================
+           SCENARIO 1: PHISHING MESSAGE INVESTIGATION LAB (POSITION: -11, 0, 2)
+           ==================================================================== -->
+      <a-entity id="pod-phishing" position="-11 0 2">
+        <!-- Room Dividers -->
+        <a-box position="0 2.5 -4" scale="6.5 5 0.2" mixin="wall-panel"></a-box>
+        <a-box position="-3.25 2.5 0" scale="0.2 5 8" mixin="wall-panel"></a-box>
+
+        <!-- Scenario Banner -->
+        <a-text value="POD 01: PHISHING ATTACK LAB" position="0 4.2 -3.8" align="center" width="4.5" color="#00f3ff"></a-text>
+
+        <!-- Floating 3D Simulated Smartphone Terminal -->
+        <a-box position="0 2.2 -2.5" scale="2.2 3.2 0.1" material="color: #030712; roughness: 0.2; metalness: 0.9"></a-box>
+        <a-box position="0 3.75 -2.5" scale="2.2 0.1 0.12" mixin="neon-cyan-glow"></a-box>
+
+        <!-- The Phishing Message Display -->
+        <a-plane position="0 2.2 -2.44" width="2.0" height="2.8" material="color: #0b1329">
+          <a-text value="SMS NOTIFICATION\nFrom: +91-9876543210 (Personal SIM)\n\n'URGENT: Your NetBanking account will\nbe DEACTIVATED within 2 hours due to\nexpired PAN card KYC verification.\n\nClick link to complete biometric KYC:\nhttp://hdfc-verify-kyc.top/portal\n\nDo not ignore to avoid ₹10,000 fine.'" position="0 0.15 0.02" align="center" width="1.8" color="#ffffff"></a-text>
+        </a-plane>
+
+        <!-- 3 Interactive Clue Inspection Buttons -->
+        <a-entity position="0 0.4 -1.2">
+          <!-- Clue 1: Inspect Sender -->
+          <a-box class="clickable" vr-button="hoverColor: #00f3ff; defaultColor: #1e293b" position="-0.9 0 0" scale="0.8 0.25 0.15" material="color: #1e293b"
+                 onclick="inspectScenarioClue('phishing', 0, 'Sender Inspection', 'CRITICAL RED FLAG: Sender is a random 10-digit mobile number (+91-9876543210), NOT an official 6-character bank alpha header (e.g., VM-HDFCBK).')"></a-box>
+          <a-text value="[1] INSPECT SENDER" position="-0.9 0 0.1" align="center" width="1.3" color="#00f3ff"></a-text>
+
+          <!-- Clue 2: Inspect URL -->
+          <a-box class="clickable" vr-button="hoverColor: #00f3ff; defaultColor: #1e293b" position="0 0 0" scale="0.8 0.25 0.15" material="color: #1e293b"
+                 onclick="inspectScenarioClue('phishing', 1, 'Domain Inspection', 'CRITICAL RED FLAG: Domain is hdfc-verify-kyc.top. Legitimate banks strictly use official top-level domains like .com or .co.in. The .top extension is a counterfeit harvesting server.')"></a-box>
+          <a-text value="[2] INSPECT URL" position="0 0 0.1" align="center" width="1.3" color="#00f3ff"></a-text>
+
+          <!-- Clue 3: Inspect Urgency -->
+          <a-box class="clickable" vr-button="hoverColor: #00f3ff; defaultColor: #1e293b" position="0.9 0 0" scale="0.8 0.25 0.15" material="color: #1e293b"
+                 onclick="inspectScenarioClue('phishing', 2, 'Urgency Analysis', 'PSYCHOLOGICAL TRAP: Artificial urgency (\"within 2 hours\") and fake penalty threats are designed to trigger panic, forcing victims to bypass rational logic.')"></a-box>
+          <a-text value="[3] ANALYSE URGENCY" position="0.9 0 0.1" align="center" width="1.3" color="#00f3ff"></a-text>
+        </a-entity>
+
+        <!-- Clue Explanation Display Box -->
+        <a-entity id="phishing-clue-display" position="0 1.2 -1.5" visible="false">
+          <a-box scale="2.8 0.7 0.1" mixin="glass-holo"></a-box>
+          <a-text id="phishing-clue-text" value="CLUE DETAILS" position="0 0 0.06" align="center" width="2.4" color="#00f3ff"></a-text>
+        </a-entity>
+
+        <!-- Decision Terminals -->
+        <a-entity position="0 0.4 -0.3">
+          <!-- Risky Decision Button -->
+          <a-box class="clickable" vr-button="hoverColor: #ff3344; defaultColor: #3b0764" position="-0.9 0 0" scale="0.95 0.35 0.2" material="color: #3b0764"
+                 onclick="evaluateScenarioChoice('phishing', false, 'ACCOUNT COMPROMISED!', 'You entered your NetBanking User ID and OTP on a credential-harvesting server. Attackers instantly logged in, transferred funds, and emptied your bank balance.')"></a-box>
+          <a-text value="A: CLICK LINK &\nSUBMIT OTP" position="-0.9 0 0.12" align="center" width="1.4" color="#ffaa00"></a-text>
+
+          <!-- Safe Decision Button -->
+          <a-box class="clickable" vr-button="hoverColor: #00ff88; defaultColor: #064e3b" position="0.9 0 0" scale="0.95 0.35 0.2" material="color: #064e3b"
+                 onclick="evaluateScenarioChoice('phishing', true, 'PHISHING DEFENSE MASTERED!', 'Excellent threat recognition! You identified the counterfeit .top domain, personal mobile sender, and panic-inducing urgency. You deleted the SMS and reported it to 1930.')"></a-box>
+          <a-text value="B: REJECT &\nREPORT TO 1930" position="0.9 0 0.12" align="center" width="1.4" color="#00ff88"></a-text>
+        </a-entity>
+
+        <!-- Outcome / Feedback Board -->
+        <a-entity id="phishing-outcome-board" position="0 2.2 -0.3" visible="false">
+          <a-box scale="2.8 1.4 0.1" material="color: #0b1329"></a-box>
+          <a-text id="phishing-outcome-title" value="RESULT" position="0 0.4 0.06" align="center" width="2.5" color="#00ff88"></a-text>
+          <a-text id="phishing-outcome-desc" value="Explanation goes here" position="0 -0.15 0.06" align="center" width="2.3" color="#e2e8f0"></a-text>
+        </a-entity>
+      </a-entity>
+
+      <!-- ====================================================================
+           SCENARIO 2: FAKE INVESTMENT FRAUD SUITE (POSITION: 0, 0, -4)
+           ==================================================================== -->
+      <a-entity id="pod-investment" position="0 0 -4">
+        <!-- Room Divider -->
+        <a-box position="0 2.5 -4" scale="6.5 5 0.2" mixin="wall-panel"></a-box>
+
+        <!-- Scenario Banner -->
+        <a-text value="POD 02: HIGH-YIELD INVESTMENT FRAUD" position="0 4.2 -3.8" align="center" width="4.5" color="#b026ff"></a-text>
+
+        <!-- 3D Rising Fake Stock / Crypto Holographic Graph -->
+        <a-entity position="0 2.4 -2.8" hologram-float="speed: 1.2; height: 0.06">
+          <a-box scale="3.2 2 0.08" mixin="glass-holo"></a-box>
+          <a-text value="QUANTUM AI ARBITRAGE FUND\n\n'GUARANTEED 15% DAILY PROFIT!'\nInvest ₹50,000 today -> Receive ₹2,50,000 next month!\nEndorsed by Top Celebrities • Zero Risk\nVIP WhatsApp Group Access • Instant UPI Deposit" position="0 0.1 0.06" align="center" width="2.9" color="#ffffff"></a-text>
+          <!-- Neon Green Fake Profit Line -->
+          <a-box position="-0.8 -0.5 0.06" scale="0.8 0.04 0.02" rotation="0 0 35" mixin="neon-cyan-glow"></a-box>
+          <a-box position="0.3 -0.05 0.06" scale="1.4 0.04 0.02" rotation="0 0 45" mixin="neon-cyan-glow"></a-box>
+        </a-entity>
+
+        <!-- Clue Inspection Buttons -->
+        <a-entity position="0 0.4 -1.4">
+          <a-box class="clickable" vr-button="hoverColor: #b026ff; defaultColor: #1e293b" position="-0.9 0 0" scale="0.8 0.25 0.15" material="color: #1e293b"
+                 onclick="inspectScenarioClue('investment', 0, 'SEBI Regulatory Check', 'CRITICAL RED FLAG: This firm is NOT registered with SEBI or any financial authority. Solicitations on WhatsApp/Telegram guaranteeing profits are illegal in India.')"></a-box>
+          <a-text value="[1] CHECK SEBI REG" position="-0.9 0 0.1" align="center" width="1.3" color="#b026ff"></a-text>
+
+          <a-box class="clickable" vr-button="hoverColor: #b026ff; defaultColor: #1e293b" position="0 0 0" scale="0.8 0.25 0.15" material="color: #1e293b"
+                 onclick="inspectScenarioClue('investment', 1, 'The Guarantee Fallacy', 'CORE RULE OF FINANCE: High return ALWAYS means high risk. Any scheme promising \"guaranteed zero-risk 15% daily profit\" is by mathematical definition a Ponzi scam.')"></a-box>
+          <a-text value="[2] AUDIT 15% CLAIM" position="0 0 0.1" align="center" width="1.3" color="#b026ff"></a-text>
+
+          <a-box class="clickable" vr-button="hoverColor: #b026ff; defaultColor: #1e293b" position="0.9 0 0" scale="0.8 0.25 0.15" material="color: #1e293b"
+                 onclick="inspectScenarioClue('investment', 2, 'Withdrawal Freeze Trap', 'THE EXIT TRAP: When you try to withdraw fictional profits, they demand a 20% \"processing fee/tax\". When paid, they block your number completely.')"></a-box>
+          <a-text value="[3] WITHDRAWAL AUDIT" position="0.9 0 0.1" align="center" width="1.3" color="#b026ff"></a-text>
+        </a-entity>
+
+        <!-- Clue Explanation Display -->
+        <a-entity id="investment-clue-display" position="0 1.2 -1.6" visible="false">
+          <a-box scale="2.8 0.7 0.1" mixin="glass-holo"></a-box>
+          <a-text id="investment-clue-text" value="CLUE DETAILS" position="0 0 0.06" align="center" width="2.4" color="#b026ff"></a-text>
+        </a-entity>
+
+        <!-- Decision Buttons -->
+        <a-entity position="0 0.4 -0.4">
+          <a-box class="clickable" vr-button="hoverColor: #ff3344; defaultColor: #3b0764" position="-0.9 0 0" scale="0.95 0.35 0.2" material="color: #3b0764"
+                 onclick="evaluateScenarioChoice('investment', false, 'PONZI VICTIM!', 'You deposited ₹50,000 into a fraudulent mule account. The website showed fake rising balances, but all funds were stolen. You were subsequently blocked.')"></a-box>
+          <a-text value="A: INVEST ₹50,000\nVIA UPI / CRYPTO" position="-0.9 0 0.12" align="center" width="1.4" color="#ffaa00"></a-text>
+
+          <a-box class="clickable" vr-button="hoverColor: #00ff88; defaultColor: #064e3b" position="0.9 0 0" scale="0.95 0.35 0.2" material="color: #064e3b"
+                 onclick="evaluateScenarioChoice('investment', true, 'PONZI BUSTED!', 'Brilliant skepticism! You recognized that \"guaranteed high returns without risk\" is an impossibility, and verified lack of SEBI registration before exposing capital.')"></a-box>
+          <a-text value="B: REJECT & REPORT\nTO SEBI SCORES" position="0.9 0 0.12" align="center" width="1.4" color="#00ff88"></a-text>
+        </a-entity>
+
+        <!-- Outcome Board -->
+        <a-entity id="investment-outcome-board" position="0 2.2 -0.4" visible="false">
+          <a-box scale="2.8 1.4 0.1" material="color: #0b1329"></a-box>
+          <a-text id="investment-outcome-title" value="RESULT" position="0 0.4 0.06" align="center" width="2.5" color="#00ff88"></a-text>
+          <a-text id="investment-outcome-desc" value="Explanation goes here" position="0 -0.15 0.06" align="center" width="2.3" color="#e2e8f0"></a-text>
+        </a-entity>
+      </a-entity>
+
+      <!-- ====================================================================
+           SCENARIO 3: UPI QR CODE / CASHBACK SCAM COUNTER (POSITION: 11, 0, 2)
+           ==================================================================== -->
+      <a-entity id="pod-upi" position="11 0 2">
+        <!-- Room Dividers -->
+        <a-box position="0 2.5 -4" scale="6.5 5 0.2" mixin="wall-panel"></a-box>
+        <a-box position="3.25 2.5 0" scale="0.2 5 8" mixin="wall-panel"></a-box>
+
+        <!-- Scenario Banner -->
+        <a-text value="POD 03: UPI PAYMENT & QR TRAP" position="0 4.2 -3.8" align="center" width="4.5" color="#00ff88"></a-text>
+
+        <!-- 3D Digital Payment Counter & Floating QR Stand -->
+        <a-box position="0 0.8 -2.4" scale="2.4 1.2 0.8" material="color: #0b1329; roughness: 0.4"></a-box>
+        
+        <!-- Floating 3D QR Code Display -->
+        <a-entity position="0 2.2 -2.3" hologram-float="speed: 1.4; height: 0.05">
+          <a-box scale="1.8 1.8 0.08" material="color: #ffffff"></a-box>
+          <!-- Stylized QR blocks -->
+          <a-box position="-0.4 0.4 0.05" scale="0.4 0.4 0.02" material="color: #030712"></a-box>
+          <a-box position="0.4 0.4 0.05" scale="0.4 0.4 0.02" material="color: #030712"></a-box>
+          <a-box position="-0.4 -0.4 0.05" scale="0.4 0.4 0.02" material="color: #030712"></a-box>
+          <a-box position="0.2 -0.2 0.05" scale="0.6 0.2 0.02" material="color: #030712"></a-box>
+          <a-text value="CASHBACK VOUCHER: ₹25,000\n'Scan this QR & enter your 6-digit\nUPI PIN to RECEIVE refund into your bank!'" position="0 -1.2 0" align="center" width="2.4" color="#00ff88"></a-text>
+        </a-entity>
+
+        <!-- Clue Inspection Buttons -->
+        <a-entity position="0 0.4 -1.2">
+          <a-box class="clickable" vr-button="hoverColor: #00ff88; defaultColor: #1e293b" position="-0.9 0 0" scale="0.8 0.25 0.15" material="color: #1e293b"
+                 onclick="inspectScenarioClue('upi', 0, 'Decoded QR Payload', 'DECODED INTENT: upi://pay?pa=scammer@oksbi&am=25000. This is an OUTGOING PAYMENT string, NOT a receipt or voucher deposit!')"></a-box>
+          <a-text value="[1] DECODE QR" position="-0.9 0 0.1" align="center" width="1.3" color="#00ff88"></a-text>
+
+          <a-box class="clickable" vr-button="hoverColor: #00ff88; defaultColor: #1e293b" position="0 0 0" scale="0.8 0.25 0.15" material="color: #1e293b"
+                 onclick="inspectScenarioClue('upi', 1, 'The Golden Rule of UPI', 'THE GOLDEN RULE OF UPI: You NEVER enter your UPI PIN to receive money! Entering a UPI PIN exclusively AUTHORIZES A DEBIT from your bank.')"></a-box>
+          <a-text value="[2] UPI PIN RULE" position="0 0 0.1" align="center" width="1.3" color="#00ff88"></a-text>
+
+          <a-box class="clickable" vr-button="hoverColor: #00ff88; defaultColor: #1e293b" position="0.9 0 0" scale="0.8 0.25 0.15" material="color: #1e293b"
+                 onclick="inspectScenarioClue('upi', 2, 'Fake Voucher Myth', 'MYTH BUSTED: UPI architecture (NPCI) does NOT have \"money receiver vouchers\" requiring PIN authentication. Anyone claiming this is committing fraud.')"></a-box>
+          <a-text value="[3] VOUCHER AUDIT" position="0.9 0 0.1" align="center" width="1.3" color="#00ff88"></a-text>
+        </a-entity>
+
+        <!-- Clue Explanation Box -->
+        <a-entity id="upi-clue-display" position="0 1.2 -1.5" visible="false">
+          <a-box scale="2.8 0.7 0.1" mixin="glass-holo"></a-box>
+          <a-text id="upi-clue-text" value="CLUE DETAILS" position="0 0 0.06" align="center" width="2.4" color="#00ff88"></a-text>
+        </a-entity>
+
+        <!-- Decision Buttons -->
+        <a-entity position="0 0.4 -0.3">
+          <a-box class="clickable" vr-button="hoverColor: #ff3344; defaultColor: #3b0764" position="-0.9 0 0" scale="0.95 0.35 0.2" material="color: #3b0764"
+                 onclick="evaluateScenarioChoice('upi', false, 'ACCOUNT DEBITED!', '₹25,000 was deducted from your account. You fell for the QR trap: entering your UPI PIN authorizes a withdrawal, never a deposit!')"></a-box>
+          <a-text value="A: SCAN QR & ENTER\n6-DIGIT UPI PIN" position="-0.9 0 0.12" align="center" width="1.4" color="#ffaa00"></a-text>
+
+          <a-box class="clickable" vr-button="hoverColor: #00ff88; defaultColor: #064e3b" position="0.9 0 0" scale="0.95 0.35 0.2" material="color: #064e3b"
+                 onclick="evaluateScenarioChoice('upi', true, 'UPI GUARDIAN!', 'Perfect mastery of the Golden Rule! You remembered that receiving money requires ZERO PIN entry. You refused the scammer and saved your funds.')"></a-box>
+          <a-text value="B: REFUSE PIN ENTRY\n& REPORT QR" position="0.9 0 0.12" align="center" width="1.4" color="#00ff88"></a-text>
+        </a-entity>
+
+        <!-- Outcome Board -->
+        <a-entity id="upi-outcome-board" position="0 2.2 -0.3" visible="false">
+          <a-box scale="2.8 1.4 0.1" material="color: #0b1329"></a-box>
+          <a-text id="upi-outcome-title" value="RESULT" position="0 0.4 0.06" align="center" width="2.5" color="#00ff88"></a-text>
+          <a-text id="upi-outcome-desc" value="Explanation goes here" position="0 -0.15 0.06" align="center" width="2.3" color="#e2e8f0"></a-text>
+        </a-entity>
+      </a-entity>
+
+      <!-- ====================================================================
+           SCENARIO 4: FAKE CUSTOMER CARE & REMOTE ACCESS (POSITION: -8, 0, -12)
+           ==================================================================== -->
+      <a-entity id="pod-customercare" position="-8 0 -12">
+        <a-box position="0 2.5 -4" scale="6.5 5 0.2" mixin="wall-panel"></a-box>
+        <a-text value="POD 04: FAKE CUSTOMER CARE SCAM" position="0 4.2 -3.8" align="center" width="4.5" color="#ffaa00"></a-text>
+
+        <!-- Holographic Call Terminal -->
+        <a-entity position="0 2.3 -2.8" hologram-float="speed: 1.5; height: 0.05">
+          <a-box scale="3.2 2 0.08" mixin="glass-holo"></a-box>
+          <a-text value="INCOMING CALL: 'ELECTRICITY BOARD HELPLINE'\nCaller: 'Executive Sharma from TNEB/Discom'\n\n'Your power will be disconnected at 8 PM tonight\ndue to unpaid ₹11 verification charge.\nDownload our QuickSupport-Tool.apk now so our\nsupport team can assist you with payment.'" position="0 0.1 0.06" align="center" width="2.8" color="#ffffff"></a-text>
+        </a-entity>
+
+        <!-- Clue Buttons -->
+        <a-entity position="0 0.4 -1.4">
+          <a-box class="clickable" vr-button="hoverColor: #ffaa00; defaultColor: #1e293b" position="-0.9 0 0" scale="0.8 0.25 0.15" material="color: #1e293b"
+                 onclick="inspectScenarioClue('customercare', 0, 'Google Maps Number Fraud', 'RED FLAG: The number was found on a Google Maps search listing edited by fraudsters. Official bank/utility numbers are strictly verified on official bills.')"></a-box>
+          <a-text value="[1] PHONE AUDIT" position="-0.9 0 0.1" align="center" width="1.3" color="#ffaa00"></a-text>
+
+          <a-box class="clickable" vr-button="hoverColor: #ffaa00; defaultColor: #1e293b" position="0 0 0" scale="0.8 0.25 0.15" material="color: #1e293b"
+                 onclick="inspectScenarioClue('customercare', 1, 'Remote Screen Sharing Trojan', 'DANGEROUS APP: QuickSupport, AnyDesk, and TeamViewer allow remote screen sharing. Scammers watch you type passwords and intercept 2FA SMS OTPs in real-time.')"></a-box>
+          <a-text value="[2] APK ANALYSIS" position="0 0 0.1" align="center" width="1.3" color="#ffaa00"></a-text>
+
+          <a-box class="clickable" vr-button="hoverColor: #ffaa00; defaultColor: #1e293b" position="0.9 0 0" scale="0.8 0.25 0.15" material="color: #1e293b"
+                 onclick="inspectScenarioClue('customercare', 2, 'Disconnection Policy Audit', 'UTILITY PROTOCOL: Government power utilities never disconnect power on 2 hours notice via WhatsApp or demand remote desktop software.')"></a-box>
+          <a-text value="[3] POLICY CHECK" position="0.9 0 0.1" align="center" width="1.3" color="#ffaa00"></a-text>
+        </a-entity>
+
+        <!-- Clue Display -->
+        <a-entity id="customercare-clue-display" position="0 1.2 -1.6" visible="false">
+          <a-box scale="2.8 0.7 0.1" mixin="glass-holo"></a-box>
+          <a-text id="customercare-clue-text" value="CLUE DETAILS" position="0 0 0.06" align="center" width="2.4" color="#ffaa00"></a-text>
+        </a-entity>
+
+        <!-- Decision Buttons -->
+        <a-entity position="0 0.4 -0.4">
+          <a-box class="clickable" vr-button="hoverColor: #ff3344; defaultColor: #3b0764" position="-0.9 0 0" scale="0.95 0.35 0.2" material="color: #3b0764"
+                 onclick="evaluateScenarioChoice('customercare', false, 'DEVICE HIJACKED!', 'The scammer gained full remote viewing of your phone screen, intercepted your banking OTPs, and initiated massive unauthorized debits.')"></a-box>
+          <a-text value="A: INSTALL APK &\nSHARE ACCESS CODE" position="-0.9 0 0.12" align="center" width="1.4" color="#ffaa00"></a-text>
+
+          <a-box class="clickable" vr-button="hoverColor: #00ff88; defaultColor: #064e3b" position="0.9 0 0" scale="0.95 0.35 0.2" material="color: #064e3b"
+                 onclick="evaluateScenarioChoice('customercare', true, 'DEVICE SENTINEL!', 'Outstanding security defense! You refused to install remote desktop applications and verified your bill directly on the official utility website.')"></a-box>
+          <a-text value="B: HANG UP &\nVERIFY VIA BILL" position="0.9 0 0.12" align="center" width="1.4" color="#00ff88"></a-text>
+        </a-entity>
+
+        <!-- Outcome Board -->
+        <a-entity id="customercare-outcome-board" position="0 2.2 -0.4" visible="false">
+          <a-box scale="2.8 1.4 0.1" material="color: #0b1329"></a-box>
+          <a-text id="customercare-outcome-title" value="RESULT" position="0 0.4 0.06" align="center" width="2.5" color="#00ff88"></a-text>
+          <a-text id="customercare-outcome-desc" value="Explanation goes here" position="0 -0.15 0.06" align="center" width="2.3" color="#e2e8f0"></a-text>
+        </a-entity>
+      </a-entity>
+
+      <!-- ====================================================================
+           SCENARIO 5: SOCIAL ENGINEERING / IMPERSONATION (POSITION: 8, 0, -12)
+           ==================================================================== -->
+      <a-entity id="pod-social" position="8 0 -12">
+        <a-box position="0 2.5 -4" scale="6.5 5 0.2" mixin="wall-panel"></a-box>
+        <a-text value="POD 05: SOCIAL ENGINEERING SCAM" position="0 4.2 -3.8" align="center" width="4.5" color="#ff007f"></a-text>
+
+        <!-- Holographic Emergency Chat -->
+        <a-entity position="0 2.3 -2.8" hologram-float="speed: 1.3; height: 0.06">
+          <a-box scale="3.2 2 0.08" mixin="glass-holo"></a-box>
+          <a-text value="WHATSAPP EMERGENCY: 'CEO / CLOSE FRIEND'\n\n'Hey! I am stuck at London Airport customs and my\ncredit cards are blocked due to an IT glitch.\nTransfer ₹50,000 urgently to my clearing agent:\nUPI: custom-agent@icici\nDO NOT CALL ME - in a secure customs zone!'" position="0 0.1 0.06" align="center" width="2.8" color="#ffffff"></a-text>
+        </a-entity>
+
+        <!-- Clue Buttons -->
+        <a-entity position="0 0.4 -1.4">
+          <a-box class="clickable" vr-button="hoverColor: #ff007f; defaultColor: #1e293b" position="-0.9 0 0" scale="0.8 0.25 0.15" material="color: #1e293b"
+                 onclick="inspectScenarioClue('social', 0, 'The \"Do Not Call\" Trap', 'CRITICAL SIGNATURE: Scammers always forbid calling because hearing a voice immediately shatters the impersonation. It isolates the victim.')"></a-box>
+          <a-text value="[1] 'NO CALL' TRAP" position="-0.9 0 0.1" align="center" width="1.3" color="#ff007f"></a-text>
+
+          <a-box class="clickable" vr-button="hoverColor: #ff007f; defaultColor: #1e293b" position="0 0 0" scale="0.8 0.25 0.15" material="color: #1e293b"
+                 onclick="inspectScenarioClue('social', 1, 'Third-Party Mule UPI', 'MULE ACCOUNT: The destination UPI does not belong to your friend or company. It points to a rented mule wallet designed for instant cash withdrawal.')"></a-box>
+          <a-text value="[2] AUDIT UPI NAME" position="0 0 0.1" align="center" width="1.3" color="#ff007f"></a-text>
+
+          <a-box class="clickable" vr-button="hoverColor: #ff007f; defaultColor: #1e293b" position="0.9 0 0" scale="0.8 0.25 0.15" material="color: #1e293b"
+                 onclick="inspectScenarioClue('social', 2, 'Out-of-Band Verification', 'GOLDEN DEFENSE: Never transfer money based on a text. Always verify via a secondary channel (phone call to known personal number, voice note, or mutual contact).')"></a-box>
+          <a-text value="[3] 2ND CHANNEL RULE" position="0.9 0 0.1" align="center" width="1.3" color="#ff007f"></a-text>
+        </a-entity>
+
+        <!-- Clue Display -->
+        <a-entity id="social-clue-display" position="0 1.2 -1.6" visible="false">
+          <a-box scale="2.8 0.7 0.1" mixin="glass-holo"></a-box>
+          <a-text id="social-clue-text" value="CLUE DETAILS" position="0 0 0.06" align="center" width="2.4" color="#ff007f"></a-text>
+        </a-entity>
+
+        <!-- Decision Buttons -->
+        <a-entity position="0 0.4 -0.4">
+          <a-box class="clickable" vr-button="hoverColor: #ff3344; defaultColor: #3b0764" position="-0.9 0 0" scale="0.95 0.35 0.2" material="color: #3b0764"
+                 onclick="evaluateScenarioChoice('social', false, 'MANIPULATED!', 'You sent ₹50,000 out of panic. The real friend was sitting safely at home. You fell victim to a social engineering impersonation scam.')"></a-box>
+          <a-text value="A: TRANSFER ₹50,000\nOUT OF PANIC" position="-0.9 0 0.12" align="center" width="1.4" color="#ffaa00"></a-text>
+
+          <a-box class="clickable" vr-button="hoverColor: #00ff88; defaultColor: #064e3b" position="0.9 0 0" scale="0.95 0.35 0.2" material="color: #064e3b"
+                 onclick="evaluateScenarioChoice('social', true, 'SOCIAL FIREWALL!', 'Masterful composure! You refused to let emotional panic bypass security. You called their known phone number, verified the scam, and saved ₹50,000.')"></a-box>
+          <a-text value="B: CALL FRIEND DIRECTLY\nON PERSONAL LINE" position="0.9 0 0.12" align="center" width="1.4" color="#00ff88"></a-text>
+        </a-entity>
+
+        <!-- Outcome Board -->
+        <a-entity id="social-outcome-board" position="0 2.2 -0.4" visible="false">
+          <a-box scale="2.8 1.4 0.1" material="color: #0b1329"></a-box>
+          <a-text id="social-outcome-title" value="RESULT" position="0 0.4 0.06" align="center" width="2.5" color="#00ff88"></a-text>
+          <a-text id="social-outcome-desc" value="Explanation goes here" position="0 -0.15 0.06" align="center" width="2.3" color="#e2e8f0"></a-text>
+        </a-entity>
+      </a-entity>
+    </a-entity>
+
+    <!-- ========================================================================
+         ZONE 3: PERSONAL ANALYSIS & 3D DASHBOARD (EAST WING: 32, 0, 0)
+         ======================================================================== -->
+    <a-entity id="zone-analysis" position="32 0 0" rotation="0 -90 0">
+      <!-- Floor & Architectural Walls -->
+      <a-box position="0 -0.05 0" scale="18 0.1 16" mixin="floor-tile"></a-box>
+      <a-box position="0 4 -8" scale="18 8 0.4" mixin="wall-panel"></a-box>
+      <a-box position="-9 4 0" scale="0.4 8 16" mixin="wall-panel"></a-box>
+      <a-box position="9 4 0" scale="0.4 8 16" mixin="wall-panel"></a-box>
+
+      <!-- Zone Title Header -->
+      <a-text value="PERSONAL THREAT INTELLIGENCE DASHBOARD" position="0 6.2 -7.6" align="center" width="7" color="#b026ff"></a-text>
+
+      <!-- Center Main Holographic Performance Scoreboard -->
+      <a-entity position="0 3.2 -6" hologram-float="speed: 1.1; height: 0.06">
+        <a-box scale="6.4 3.8 0.1" mixin="glass-holo"></a-box>
+        <a-box position="0 1.95 0" scale="6.4 0.15 0.12" mixin="neon-purple-glow"></a-box>
+
+        <!-- Big Score Display -->
+        <a-text value="OVERALL CYBER ARMOR" position="-1.8 1.2 0.08" align="center" width="3.5" color="#94a3b8"></a-text>
+        <a-text id="dash-score-text" value="0%" position="-1.8 0.4 0.08" align="center" width="8" color="#00f3ff"></a-text>
+
+        <!-- Stat Breakdown Columns -->
+        <a-text id="dash-scenarios-text" value="0 / 5 Completed" position="1.4 1.2 0.08" align="left" width="3.2" color="#ffffff"></a-text>
+        <a-text id="dash-safe-text" value="Safe Decisions: 0" position="1.4 0.7 0.08" align="left" width="3.2" color="#00ff88"></a-text>
+        <a-text id="dash-risky-text" value="Risky Traps Tripped: 0" position="1.4 0.2 0.08" align="left" width="3.2" color="#ff3344"></a-text>
+        <a-text id="dash-rating-text" value="RATING: ROOKIE TARGET" position="0 -1.1 0.08" align="center" width="4.5" color="#ffaa00"></a-text>
+      </a-entity>
+
+      <!-- 3D Achievement Medals Trophy Wall -->
+      <a-entity position="0 1.2 -3.2">
+        <a-text value="CYBER SENTINEL BADGES UNLOCKED" position="0 1.4 0" align="center" width="4.5" color="#00f3ff"></a-text>
+
+        <!-- Badge 1: Phishing Hunter -->
+        <a-cylinder id="badge-phishing" position="-2.4 0.4 0" radius="0.35" height="0.08" rotation="90 0 0" material="color: #334155; metalness: 0.9; roughness: 0.2"></a-cylinder>
+        <a-text value="PHISHING\nHUNTER" position="-2.4 -0.2 0" align="center" width="1.8" color="#e2e8f0"></a-text>
+
+        <!-- Badge 2: Ponzi Buster -->
+        <a-cylinder id="badge-investment" position="-1.2 0.4 0" radius="0.35" height="0.08" rotation="90 0 0" material="color: #334155; metalness: 0.9; roughness: 0.2"></a-cylinder>
+        <a-text value="PONZI\nBUSTER" position="-1.2 -0.2 0" align="center" width="1.8" color="#e2e8f0"></a-text>
+
+        <!-- Badge 3: UPI Guardian -->
+        <a-cylinder id="badge-upi" position="0 0.4 0" radius="0.35" height="0.08" rotation="90 0 0" material="color: #334155; metalness: 0.9; roughness: 0.2"></a-cylinder>
+        <a-text value="UPI\nGUARDIAN" position="0 -0.2 0" align="center" width="1.8" color="#e2e8f0"></a-text>
+
+        <!-- Badge 4: Device Sentinel -->
+        <a-cylinder id="badge-customercare" position="1.2 0.4 0" radius="0.35" height="0.08" rotation="90 0 0" material="color: #334155; metalness: 0.9; roughness: 0.2"></a-cylinder>
+        <a-text value="DEVICE\nSENTINEL" position="1.2 -0.2 0" align="center" width="1.8" color="#e2e8f0"></a-text>
+
+        <!-- Badge 5: Social Firewall -->
+        <a-cylinder id="badge-social" position="2.4 0.4 0" radius="0.35" height="0.08" rotation="90 0 0" material="color: #334155; metalness: 0.9; roughness: 0.2"></a-cylinder>
+        <a-text value="SOCIAL\nFIREWALL" position="2.4 -0.2 0" align="center" width="1.8" color="#e2e8f0"></a-text>
+      </a-entity>
+
+      <!-- Reset Progress & Return Portal -->
+      <a-entity position="0 0.1 2">
+        <a-cylinder class="clickable" vr-button="hoverColor: #00f3ff; defaultColor: #1e1b4b" position="-1.8 0 0" radius="1.1" height="0.15" material="color: #1e1b4b"
+                    onclick="gameState.resetProgress(); showNotification('Stats Reset to 0');"></a-cylinder>
+        <a-text value="RESET DATA" position="-1.8 0.7 0" align="center" width="2" color="#ffaa00"></a-text>
+
+        <a-cylinder class="clickable" vr-button="hoverColor: #b026ff; defaultColor: #1e1b4b" position="1.8 0 0" radius="1.1" height="0.15" material="color: #1e1b4b"
+                    zone-teleport-target="targetX: 0; targetY: 0; targetZ: 6; zoneName: Central Hub"></a-cylinder>
+        <a-text value="RETURN TO HUB" position="1.8 0.7 0" align="center" width="2" color="#b026ff"></a-text>
+      </a-entity>
+    </a-entity>
+
+    <!-- ========================================================================
+         ZONE 4: LEARNING & PREVENTION CENTRE (WEST WING: -32, 0, 0)
+         ======================================================================== -->
+    <a-entity id="zone-learning" position="-32 0 0" rotation="0 90 0">
+      <!-- Floor & Walls -->
+      <a-box position="0 -0.05 0" scale="18 0.1 16" mixin="floor-tile"></a-box>
+      <a-box position="0 4 -8" scale="18 8 0.4" mixin="wall-panel"></a-box>
+      <a-box position="-9 4 0" scale="0.4 8 16" mixin="wall-panel"></a-box>
+      <a-box position="9 4 0" scale="0.4 8 16" mixin="wall-panel"></a-box>
+
+      <a-text value="LEARNING & FRAUD PREVENTION CENTRE" position="0 6.2 -7.6" align="center" width="7" color="#00f3ff"></a-text>
+
+      <!-- 4 Interactive 3D Knowledge Pedestals -->
+      <!-- Pedestal 1: Phishing Anatomy -->
+      <a-entity position="-4.5 0 -4">
+        <a-cylinder position="0 0.5 0" radius="0.8" height="1" material="color: #0b1329"></a-cylinder>
+        <a-box position="0 1.8 0" scale="2.2 1.6 0.1" mixin="glass-holo"></a-box>
+        <a-text value="PHISHING DEFENSE\n\n1. Look at sender address, not display name.\n2. Verify the exact domain (.com vs .top/.cc).\n3. Banks NEVER request passwords or PINs.\n4. Real KYC updates are done in official apps." position="0 1.8 0.08" align="center" width="1.8" color="#ffffff"></a-text>
+      </a-entity>
+
+      <!-- Pedestal 2: The Golden Rule of UPI -->
+      <a-entity position="-1.5 0 -4">
+        <a-cylinder position="0 0.5 0" radius="0.8" height="1" material="color: #0b1329"></a-cylinder>
+        <a-box position="0 1.8 0" scale="2.2 1.6 0.1" mixin="glass-holo"></a-box>
+        <a-text value="UPI GOLDEN LAW\n\n• PIN IS FOR SENDING ONLY.\n• RECEIVING MONEY = 0 PIN.\n• Scanning a QR code always sends money.\n• Never accept \"money request\" notifications." position="0 1.8 0.08" align="center" width="1.8" color="#00ff88"></a-text>
+      </a-entity>
+
+      <!-- Pedestal 3: Investment Reality Check -->
+      <a-entity position="1.5 0 -4">
+        <a-cylinder position="0 0.5 0" radius="0.8" height="1" material="color: #0b1329"></a-cylinder>
+        <a-box position="0 1.8 0" scale="2.2 1.6 0.1" mixin="glass-holo"></a-box>
+        <a-text value="INVESTMENT RULES\n\n1. \"Guaranteed 10%+ profit\" = Always Fraud.\n2. Verify SEBI registration before sending money.\n3. Legitimate brokers never use Telegram groups.\n4. Fake celebrity video endorsements are AI." position="0 1.8 0.08" align="center" width="1.8" color="#b026ff"></a-text>
+      </a-entity>
+
+      <!-- Pedestal 4: Remote App & Device Safety -->
+      <a-entity position="4.5 0 -4">
+        <a-cylinder position="0 0.5 0" radius="0.8" height="1" material="color: #0b1329"></a-cylinder>
+        <a-box position="0 1.8 0" scale="2.2 1.6 0.1" mixin="glass-holo"></a-box>
+        <a-text value="DEVICE HYGIENE\n\n• Never install APK files from links/WhatsApp.\n• Never install AnyDesk/QuickSupport for banks.\n• Remote apps allow attackers to read OTPs.\n• Disconnect Wi-Fi immediately if compromised." position="0 1.8 0.08" align="center" width="1.8" color="#ffaa00"></a-text>
+      </a-entity>
+
+      <!-- Return Portal -->
+      <a-cylinder class="clickable" vr-button="hoverColor: #00f3ff; defaultColor: #1e1b4b" position="0 0.1 2" radius="1.2" height="0.15" material="color: #1e1b4b" zone-teleport-target="targetX: 0; targetY: 0; targetZ: 6; zoneName: Central Hub"></a-cylinder>
+      <a-text value="RETURN TO HUB" position="0 0.8 2" align="center" width="2.4" color="#00f3ff"></a-text>
+    </a-entity>
+
+    <!-- ========================================================================
+         ZONE 5: RECOVERY & SUPPORT CENTRE (NORTHWEST WING: -18, 0, -18)
+         REAL-WORLD CRISIS PLAYBOOK: 1930 HELPLINE & CYBERCRIME.GOV.IN
+         ======================================================================== -->
+    <a-entity id="zone-recovery" position="-18 0 -18" rotation="0 45 0">
+      <!-- Floor & Emergency Lighting -->
+      <a-box position="0 -0.05 0" scale="14 0.1 14" mixin="floor-tile"></a-box>
+      <a-box position="0 3 -6" scale="14 6 0.4" mixin="wall-panel"></a-box>
+      <a-box position="-7 3 0" scale="0.4 6 14" mixin="wall-panel"></a-box>
+
+      <!-- Emergency Red Accent Light -->
+      <a-entity light="type: point; color: #ff3344; intensity: 1.5; distance: 15" position="0 4 0"></a-entity>
+
+      <a-text value="CRISIS RECOVERY & INCIDENT RESPONSE" position="0 4.8 -5.6" align="center" width="6" color="#ff3344"></a-text>
+      <a-text value="What to do immediately when you discover a financial scam" position="0 4.3 -5.6" align="center" width="4" color="#94a3b8"></a-text>
+
+      <!-- The 4 Emergency Pillars -->
+      <a-entity position="0 2.2 -3.5">
+        <a-box scale="11 2.8 0.1" mixin="glass-holo"></a-box>
+
+        <!-- Column 1: Dial 1930 -->
+        <a-text value="1. CALL 1930 (INDIA)\nNational Cyber Financial Fraud\nHelpline. Call immediately\nwithin the 'Golden Hour' to\nfreeze funds in transit." position="-4 0.2 0.08" align="left" width="2.4" color="#ff3344"></a-text>
+
+        <!-- Column 2: Bank Lock -->
+        <a-text value="2. FREEZE ACCOUNTS\nCall your bank's 24x7 fraud\ndesk. Block NetBanking,\nUPI ID & debit card to\nstop secondary transfers." position="-1.3 0.2 0.08" align="left" width="2.4" color="#ffaa00"></a-text>
+
+        <!-- Column 3: Formal E-FIR -->
+        <a-text value="3. CYBERCRIME.GOV.IN\nFile an e-complaint on the\nNational Cyber Crime Portal.\nSave Acknowledgement\nNumber for bank dispute." position="1.4 0.2 0.08" align="left" width="2.4" color="#00f3ff"></a-text>
+
+        <!-- Column 4: Evidence Vault -->
+        <a-text value="4. SAVE EVIDENCE\nCapture full transaction ID,\nUTR reference number, chat\nscreenshots, phone numbers\nand payment receipts." position="4.1 0.2 0.08" align="left" width="2.4" color="#00ff88"></a-text>
+      </a-entity>
+
+      <!-- Interactive 60-Second Emergency Incident Drill Terminal -->
+      <a-entity position="0 0.8 0">
+        <a-box scale="4 0.8 0.6" material="color: #0b1329; metalness: 0.7"></a-box>
+        <a-text id="drill-status-text" value="PRACTICE 60-SEC EMERGENCY PROTOCOL\nClick button below to start the rapid incident response drill." position="0 0.9 0" align="center" width="3.2" color="#ffffff"></a-text>
+
+        <!-- Interactive Trigger Button -->
+        <a-box id="drill-step-btn" class="clickable" vr-button="hoverColor: #ff3344; defaultColor: #7f1d1d" position="0 0.15 0.35" scale="2.2 0.35 0.15" material="color: #7f1d1d"
+               onclick="advanceEmergencyDrill()"></a-box>
+        <a-text id="drill-btn-text" value="START PROTOCOL DRILL" position="0 0.15 0.44" align="center" width="2.2" color="#ffffff"></a-text>
+      </a-entity>
+
+      <!-- Return Portal -->
+      <a-cylinder class="clickable" vr-button="hoverColor: #00f3ff; defaultColor: #1e1b4b" position="0 0.1 3.5" radius="1" height="0.15" material="color: #1e1b4b" zone-teleport-target="targetX: 0; targetY: 0; targetZ: 6; zoneName: Central Hub"></a-cylinder>
+      <a-text value="RETURN TO HUB" position="0 0.8 3.5" align="center" width="2" color="#00f3ff"></a-text>
+    </a-entity>
+
+  </a-scene>
+</body>
+</html>
